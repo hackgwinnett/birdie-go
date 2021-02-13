@@ -9,18 +9,21 @@ import (
 	"os"
 )
 
+const colorRed = "\033[0;31m"
+const colorGreen = "\033[0;32m"
+const colorBlue = "\033[0;34m"
+const colorNone = "\033[0m"
+
 type smtpServer struct {
 	host string
 	port string
 }
 
 func main() {
+
+
 	var count int32
-	fmt.Println("-send: Send your emails")
-	fmt.Println("-store: Store your sponsors/members emails")
-	fmt.Println("-terminate: end the program")
-	fmt.Println("-help: know the commands")
-	fmt.Println("-inst: add your credentials to the database")
+	help()
 
 
 	for {
@@ -48,7 +51,7 @@ func main() {
 			os.Exit(3)
 		}
 		if choice == "store" {
-			store()
+			appEmail()
 		}
 
 		if choice == "help" {
@@ -58,6 +61,9 @@ func main() {
 		if choice == "inst" {
 			inst()
 		}
+		if choice == "init" {
+			dir()
+		}
 
 		count += 1
 
@@ -65,14 +71,21 @@ func main() {
 	}
 
 
-
-
 }
+
+func col(c string, s string) string {
+	return c + s + colorNone
+}
+
+
 
 func help() {
 	fmt.Println("-send: Send your emails")
 	fmt.Println("-store: Store your sponsors/members emails")
 	fmt.Println("-terminate: end the program")
+	fmt.Println("-help: know the commands")
+	fmt.Println("-inst: add your credentials to the database")
+	fmt.Println("-init: initialize the directory")
 }
 
 
@@ -373,6 +386,105 @@ func store() {
 
 }
 
+func appEmail() {
+
+	var choice string
+	var e string
+	var ult string
+	fmt.Println("Add to your members or sponsors? ")
+	fmt.Scanln(&choice)
+
+	if choice == "members" {
+		fmt.Println("Member to add? ")
+		fmt.Scanln(&e)
+		ult = "members.txt"
+		lr, err := os.OpenFile(ult, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Println(err)
+		}
+
+		defer lr.Close()
+		if _, err := lr.WriteString(e + "\n"); err != nil {
+			log.Println(err)
+
+		}
+	}
+		if choice == "sponsors" {
+			fmt.Println("Sponsor to add? ")
+			fmt.Scanln(&e)
+			ult = "temp.txt"
+			lr, err := os.OpenFile(ult, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			if err != nil {
+				log.Println(err)
+			}
+
+			defer lr.Close()
+			if _, err := lr.WriteString(e + "\n"); err != nil {
+				log.Println(err)
+
+			} else {
+				log.Fatal("Choose a valid option: members or sponsors to append a new email.")
+			}
+
+		}
+		if choice == "members" {
+			for {
+				var opt string
+				fmt.Println("Add another member? (yes or no) ")
+				fmt.Scanln(&opt)
+				if opt == "yes"{
+					fmt.Println("Member to add? ")
+					fmt.Scanln(&e)
+					ult = "members.txt"
+					lr, err := os.OpenFile(ult, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+					if err != nil {
+						log.Println(err)
+					}
+
+					defer lr.Close()
+					if _, err := lr.WriteString(e + "\n"); err != nil {
+						log.Println(err)
+
+					}
+				} else {
+					break
+				}
+			}
+		}
+			if choice == "sponsors" {
+				for {
+					var opt string
+					fmt.Println("Add another sponsor? (yes or no) ")
+					fmt.Scanln(&opt)
+					if opt == "yes"{
+						fmt.Println("Sponsor to add? ")
+						fmt.Scanln(&e)
+						ult = "temp.txt"
+						lr, err := os.OpenFile(ult, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+						if err != nil {
+							log.Println(err)
+						}
+
+						defer lr.Close()
+						if _, err := lr.WriteString(e + "\n"); err != nil {
+							log.Println(err)
+
+						}
+					} else {
+						break
+					}
+				}
+			}
+
+
+
+
+
+	}
+
+
+
+
 func app(s string) {
 	f, err := os.OpenFile("creds.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -396,24 +508,30 @@ func inst() {
 
 }
 
-func direct() {
-	myfile, e := os.Create("creds.txt")
+func dir() {
+	creds, e := os.Create("creds.txt")
 	if e != nil {
 		log.Fatal(e)
 	}
-	myfile.Close()
+	creds.Close()
 
 
-	myfile2, e := os.Create("temp.txt")
+	sponsors, e := os.Create("temp.txt")
 	if e != nil {
 		log.Fatal(e)
 	}
-	myfile2.Close()
+	sponsors.Close()
 
 
-	myfile3, e := os.Create("email.txt")
+	email, e := os.Create("email.txt")
 	if e != nil {
 		log.Fatal(e)
 	}
-	myfile3.Close()
+	email.Close()
+
+	members, e :=  os.Create("members.txt")
+	if e != nil {
+		log.Fatal(e)
+	}
+	members.Close()
 }

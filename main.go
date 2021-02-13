@@ -20,7 +20,7 @@ func main() {
 	fmt.Println("-store: Store your sponsors/members emails")
 	fmt.Println("-terminate: end the program")
 	fmt.Println("-help: know the commands")
-
+	fmt.Println("-inst: add your credentials to the database")
 
 
 	for {
@@ -28,7 +28,9 @@ func main() {
 		 var choice string
 		 if count >= 1 {
 		 	fmt.Println("\n")
+		 	fmt.Println("-")
 		 	fmt.Scanln(&choice)
+
 
 		 } else {
 			 fmt.Println("Choice? ")
@@ -51,6 +53,10 @@ func main() {
 
 		if choice == "help" {
 			help()
+		}
+
+		if choice == "inst" {
+			inst()
 		}
 
 		count += 1
@@ -84,6 +90,8 @@ func send() {
 
 		var to []string
 		var msg []byte
+		var user string
+		var pwd string
 
 		file, err := os.Open("email.txt")
 		if err != nil {
@@ -94,6 +102,26 @@ func send() {
 				log.Fatal(err)
 			}
 		}()
+
+		file3, err := os.Open("creds.txt")
+
+		if err != nil {
+			log.Fatalf("failed opening file: %s", err)
+		}
+
+		scann := bufio.NewScanner(file3)
+		scann.Split(bufio.ScanLines)
+		var txtlines []string
+
+		for scann.Scan() {
+			txtlines = append(txtlines, scann.Text())
+		}
+
+		file3.Close()
+
+		user = txtlines[0]
+		pwd = txtlines[1]
+
 
 		b, err := ioutil.ReadAll(file)
 		fmt.Print(b)
@@ -108,8 +136,8 @@ func send() {
 		scanner := bufio.NewScanner(file2)
 		for scanner.Scan() {
 
-			from := "hackgwinnett@gmail.com"
-			password := ""
+			from := user
+			password := pwd
 			to = []string{scanner.Text()}
 
 			smtpServer := smtpServer{host: "smtp.gmail.com", port: "587"}
@@ -132,6 +160,28 @@ func send() {
 	if t == "members" {
 		var to []string
 		var msg []byte
+		var user string
+		var pwd string
+
+		file3, err := os.Open("creds.txt")
+
+		if err != nil {
+			log.Fatalf("failed opening file: %s", err)
+		}
+
+		scann := bufio.NewScanner(file3)
+		scann.Split(bufio.ScanLines)
+		var txtlines []string
+
+		for scann.Scan() {
+			txtlines = append(txtlines, scann.Text())
+		}
+
+		file3.Close()
+
+		user = txtlines[0]
+		pwd = txtlines[1]
+
 
 		file, err := os.Open("email.txt")
 		if err != nil {
@@ -145,9 +195,12 @@ func send() {
 
 		b, err := ioutil.ReadAll(file)
 		fmt.Print(b)
-		msg = b
+		msg = []byte("To: bill@gates.com\r\n" +
+			"Subject: Why are you not using Mailtrap yet?\r\n" +
+			"\r\n" +
+			"Here’s the space for our great sales pitch\r\n")
 
-		file2, err := os.Open("temp.txt") // read sponsors email list
+		file2, err := os.Open("members.txt") // read sponsors email list
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -156,8 +209,8 @@ func send() {
 		scanner := bufio.NewScanner(file2)
 		for scanner.Scan() {
 
-			from := "XXXX"
-			password := "XXXX"
+			from := user
+			password := pwd
 			to = []string{scanner.Text()}
 
 			smtpServer := smtpServer{host: "smtp.gmail.com", port: "587"}
@@ -343,3 +396,24 @@ func inst() {
 
 }
 
+func direct() {
+	myfile, e := os.Create("creds.txt")
+	if e != nil {
+		log.Fatal(e)
+	}
+	myfile.Close()
+
+
+	myfile2, e := os.Create("temp.txt")
+	if e != nil {
+		log.Fatal(e)
+	}
+	myfile2.Close()
+
+
+	myfile3, e := os.Create("email.txt")
+	if e != nil {
+		log.Fatal(e)
+	}
+	myfile3.Close()
+}

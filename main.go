@@ -109,7 +109,7 @@ func send() {
 		for scanner.Scan() {
 
 			from := "hackgwinnett@gmail.com"
-			password := "hackgwinn@489$"
+			password := ""
 			to = []string{scanner.Text()}
 
 			smtpServer := smtpServer{host: "smtp.gmail.com", port: "587"}
